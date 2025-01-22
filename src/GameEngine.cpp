@@ -298,6 +298,14 @@ bool GameEngine::IsFullscreen() const
 	return m_Fullscreen;
 }
 
+bool GameEngine::IsPointInRect(const int& xPos, const int& yPos, const RECT& rectangle) const
+{
+	bool inHorizontal{ xPos >= rectangle.left && xPos < rectangle.left + (rectangle.right - rectangle.left)};
+	bool inVertical{ yPos >= rectangle.top && yPos <= rectangle.top + (rectangle.bottom - rectangle.top)};
+
+	return (inHorizontal && inVertical);
+}
+
 bool GameEngine::CreateGameWindow(int cmdShow)
 {
 	// Create the window class for the main window
@@ -986,6 +994,58 @@ int GameEngine::DrawString(const tstring& text, int left, int top) const
 		}
 	}
 	else return -1;
+}
+
+bool GameEngine::DrawBitmap(const Bitmap* bitmapPtr, int left, int top, RECT sourceRect, RECT destRect) const
+{
+	if (m_IsPainting)
+	{
+		if (!bitmapPtr->Exists()) return false;
+
+		const int opacity = bitmapPtr->GetOpacity();
+
+		if (opacity == 0 && bitmapPtr->HasAlphaChannel()) return true; // don't draw if opacity == 0 and opacity is used
+
+		HDC hdcMem = CreateCompatibleDC(m_HdcDraw);
+		HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, bitmapPtr->GetHandle());
+
+		int srcWidth = sourceRect.right - sourceRect.left;
+		int srcHeight = sourceRect.bottom - sourceRect.top;
+		int destWidth = destRect.right - destRect.left;
+		int destHeight = destRect.bottom - destRect.top;
+
+		if (bitmapPtr->HasAlphaChannel())
+		{
+			BLENDFUNCTION blender = { AC_SRC_OVER, 0, (BYTE)(2.55 * opacity), AC_SRC_ALPHA }; // blend function combines opacity and pixel-based transparency
+			AlphaBlend(m_HdcDraw, left, top, destWidth, destHeight, hdcMem, sourceRect.left, sourceRect.top, srcWidth, srcHeight, blender);
+		}
+		else
+		{
+			TransparentBlt(m_HdcDraw, left, top, destWidth, destHeight, hdcMem, sourceRect.left, sourceRect.top, srcWidth, srcHeight, bitmapPtr->GetTransparencyColor());
+		}
+
+		SelectObject(hdcMem, hbmOld);
+		DeleteDC(hdcMem);
+
+		return true;
+	}
+	else return false;
+}
+
+bool GameEngine::DrawBitmap(const Bitmap* bitmapPtr, int left, int top, int Scale) const
+{
+	if (m_IsPainting)
+	{
+		if (!bitmapPtr->Exists()) return false;
+
+		BITMAP bm;
+		GetObject(bitmapPtr->GetHandle(), sizeof(bm), &bm);
+		RECT sourceRect{ 0, 0, bm.bmWidth, bm.bmHeight };
+		RECT scaleRect{ 0, 0, bm.bmWidth * Scale, bm.bmHeight * Scale };
+
+		return DrawBitmap(bitmapPtr, left, top, sourceRect, scaleRect);
+	}
+	else return false;
 }
 
 

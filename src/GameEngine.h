@@ -86,6 +86,7 @@ public:
 
 	bool		HasWindowRegion		()										const;
 	bool		IsFullscreen		()										const;
+	bool		IsPointInRect		(const int& xPos, const int& yPos, const RECT& rectangle) const;
 
 	bool		IsKeyDown			(int vKey)								const;
 
@@ -97,38 +98,40 @@ public:
 	bool		MessageContinue		(const tstring& message)				const;
 
 	// Text Dimensions
-	SIZE		CalculateTextDimensions(const tstring& text, const Font* fontPtr)							const;
-	SIZE		CalculateTextDimensions(const tstring& text, const Font* fontPtr, RECT rect)				const;
+	SIZE		CalculateTextDimensions(const tstring& text, const Font* fontPtr)									const;
+	SIZE		CalculateTextDimensions(const tstring& text, const Font* fontPtr, RECT rect)						const;
 
 	// Draw Functions
 	void		SetColor			(COLORREF color);
 	void		SetFont				(Font* fontPtr);
 
-	bool		FillWindowRect		(COLORREF color)														const;
+	bool		FillWindowRect		(COLORREF color)																const;
 
-	bool		DrawLine			(int x1, int y1, int x2, int y2)										const;
+	bool		DrawLine			(int x1, int y1, int x2, int y2)												const;
 
-	bool		DrawRect			(int left, int top, int right, int bottom)								const;
-	bool		FillRect			(int left, int top, int right, int bottom)								const;
-	bool		FillRect			(int left, int top, int right, int bottom, int opacity)					const;
-	bool		DrawRoundRect		(int left, int top, int right, int bottom, int radius)					const;
-	bool		FillRoundRect		(int left, int top, int right, int bottom, int radius)					const;
-	bool		DrawOval			(int left, int top, int right, int bottom)								const;
-	bool		FillOval			(int left, int top, int right, int bottom)								const;
-	bool		FillOval			(int left, int top, int right, int bottom, int opacity)					const;
-	bool		DrawArc				(int left, int top, int right, int bottom, int startDegree, int angle)	const;
-	bool		FillArc				(int left, int top, int right, int bottom, int startDegree, int angle)	const;
+	bool		DrawRect			(int left, int top, int right, int bottom)										const;
+	bool		FillRect			(int left, int top, int right, int bottom)										const;
+	bool		FillRect			(int left, int top, int right, int bottom, int opacity)							const;
+	bool		DrawRoundRect		(int left, int top, int right, int bottom, int radius)							const;
+	bool		FillRoundRect		(int left, int top, int right, int bottom, int radius)							const;
+	bool		DrawOval			(int left, int top, int right, int bottom)										const;
+	bool		FillOval			(int left, int top, int right, int bottom)										const;
+	bool		FillOval			(int left, int top, int right, int bottom, int opacity)							const;
+	bool		DrawArc				(int left, int top, int right, int bottom, int startDegree, int angle)			const;
+	bool		FillArc				(int left, int top, int right, int bottom, int startDegree, int angle)			const;
 
-	int			DrawString			(const tstring& text, int left, int top)								const;
-	int			DrawString			(const tstring& text, int left, int top, int right, int bottom)			const;
+	int			DrawString			(const tstring& text, int left, int top)										const;
+	int			DrawString			(const tstring& text, int left, int top, int right, int bottom)					const;
 
-	bool		DrawBitmap			(const Bitmap* bitmapPtr, int left, int top)							const;
-	bool		DrawBitmap			(const Bitmap* bitmapPtr, int left, int top, RECT sourceRect)			const;
+	bool		DrawBitmap			(const Bitmap* bitmapPtr, int left, int top, RECT sourceRect, RECT destRect)	const;
+	bool		DrawBitmap			(const Bitmap* bitmapPtr, int left, int top, int Scale)							const;
+	bool		DrawBitmap			(const Bitmap* bitmapPtr, int left, int top)									const;
+	bool		DrawBitmap			(const Bitmap* bitmapPtr, int left, int top, RECT sourceRect)					const;
 
-	bool		DrawPolygon			(const POINT ptsArr[], int count)										const;
-	bool		DrawPolygon			(const POINT ptsArr[], int count, bool close)							const;
-	bool		FillPolygon			(const POINT ptsArr[], int count)										const;
-	bool		FillPolygon			(const POINT ptsArr[], int count, bool close)							const;
+	bool		DrawPolygon			(const POINT ptsArr[], int count)												const;
+	bool		DrawPolygon			(const POINT ptsArr[], int count, bool close)									const;
+	bool		FillPolygon			(const POINT ptsArr[], int count)												const;
+	bool		FillPolygon			(const POINT ptsArr[], int count, bool close)									const;
 
 	COLORREF	GetDrawColor		()						const;
 	bool		Repaint				()						const;

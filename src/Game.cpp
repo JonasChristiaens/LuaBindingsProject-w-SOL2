@@ -31,15 +31,8 @@ void Game::Initialize()
 	GAME_ENGINE->SetTitle(_T("Game Engine version 8_01"));	
 	
 	GAME_ENGINE->SetWidth(1024);
-	GAME_ENGINE->SetHeight(768);
+	GAME_ENGINE->SetHeight(810);
     GAME_ENGINE->SetFrameRate(50);
-	
-	auto result = m_LuaEngine.GetTable("game")["initialize"]();
-	if (!result.valid()) //failed
-	{
-		sol::error error = result;
-		std::cerr << "Lua error: " << error.what() << std::endl;
-	}
 
 	// Set the keys that the game needs to listen to
 	//tstringstream buffer;
@@ -52,13 +45,17 @@ void Game::Initialize()
 void Game::Start()
 {
 	// Insert code that needs to execute (once) at the start of the game, after the game window is created
-	m_LuaEngine.GetTable("game")["start"]();
+	auto result = m_LuaEngine.GetTable("game")["start"]();
+	if (!result.valid()) //failed
+	{
+		sol::error error = result;
+		std::cerr << "Lua error: " << error.what() << std::endl;
+	}
 }
 
 void Game::End()
 {
 	// Insert code that needs to execute when the game ends
-	m_LuaEngine.GetTable("game")["end"]();
 
 }
 
@@ -70,11 +67,8 @@ void Game::Paint(RECT rect)
 	=================================================================
 	*/
 
-	auto luaRect = m_LuaEngine.GetState().create_table_with("left", rect.left, "top", rect.top,
-		"right", rect.right, "bottom", rect.bottom);
-
 	// Insert paint code
-	auto result = m_LuaEngine.GetTable("game")["paint"](luaRect);
+	auto result = m_LuaEngine.GetTable("game")["paint"]();
 	if (!result.valid()) //failed
 	{
 		sol::error error = result;
@@ -85,33 +79,30 @@ void Game::Paint(RECT rect)
 void Game::Tick()
 {
 	// Insert non-paint code that needs to execute each tick 
-	m_LuaEngine.GetTable("game")["tick"]();
 }
 
 void Game::MouseButtonAction(bool isLeft, bool isDown, int x, int y, WPARAM wParam)
 {	
 	// Insert code for a mouse button action
+	auto luaMouseActions = m_LuaEngine.GetState().create_table_with(
+		"isLeft", isLeft, 
+		"isDown", isDown, 
+		"x", x, 
+		"y", y
+	);
 
-	/* Example:
-	if (isLeft == true && isDown == true) // is it a left mouse click?
+	auto gameTable = m_LuaEngine.GetTable("game");
+	if (gameTable.valid() && gameTable["mouseButtonAction"].valid())
 	{
-		if ( x > 261 && x < 261 + 117 ) // check if click lies within x coordinates of choice
-		{
-			if ( y > 182 && y < 182 + 33 ) // check if click also lies within y coordinates of choice
-			{
-				GAME_ENGINE->MessageBox(_T("Clicked."));
-			}
-		}
+		gameTable["mouseButtonAction"](isLeft, isDown, x, y);
 	}
-	*/
-	auto luaMouseActions = m_LuaEngine.GetState().create_table_with("isLeft", isLeft, "isDown", isDown, "x", x, "y", y);
-	m_LuaEngine.GetTable("game")["mouseButtonAction"](luaMouseActions);
 }
 
 void Game::MouseWheelAction(int x, int y, int distance, WPARAM wParam)
 {	
 	// Insert code for a mouse wheel action
-	m_LuaEngine.GetTable("game")["mouseWheelAction"]();
+	auto luaMouseWheel = m_LuaEngine.GetState().create_table_with("x", x, "y", y, "distance", distance);
+	m_LuaEngine.GetTable("game")["mouseWheelAction"](luaMouseWheel);
 }
 
 void Game::MouseMove(int x, int y, WPARAM wParam)
@@ -179,7 +170,13 @@ void Game::KeyPressed(TCHAR key)
 void Game::CallAction(Caller* callerPtr)
 {
 	// Insert the code that needs to execute when a Caller (= Button, TextBox, Timer, Audio) executes an action
-	m_LuaEngine.GetTable("game")["callAction"]();
+	auto result = m_LuaEngine.GetTable("game")["callAction"](callerPtr);
+	if (!result.valid()) {
+		sol::error error = result;
+		std::cerr << "Lua error in callAction: " << error.what() << std::endl;
+	}
+
+	//m_LuaEngine.GetTable("game")["callAction"]();
 }
 
 
